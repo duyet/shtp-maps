@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+bower_components
+
+# Build outputs
+dist
+build
+coverage
+
+# Minified files
+*.min.js
+*.min.css
+
+# Third-party libraries
+assets/js/islab-maps.js
+assets/js/ol-debug.js
+assets/js/bootstrap3-typeahead.min.js
+
+# Large data files (optional - can format if needed)
+assets/geodata.js
+assets/route.js
+assets/enterprise.js
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

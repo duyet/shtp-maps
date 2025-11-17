@@ -117,7 +117,7 @@ export default [
     },
     {
         ignores: [
-            'bower_components/**',
+            'assets/bower_components/**',
             'node_modules/**',
             'dist/**',
             'build/**',

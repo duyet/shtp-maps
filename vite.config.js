@@ -44,7 +44,7 @@ export default defineConfig({
             reporter: ['text', 'json', 'html'],
             exclude: [
                 'node_modules/',
-                'bower_components/',
+                'assets/bower_components/',
                 'dist/',
                 'coverage/',
                 '**/*.test.js',

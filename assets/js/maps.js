@@ -1,53 +1,61 @@
-var Point = function(x, y) {}
+// Utility functions - currently unused but kept for future extensibility
+// var Point = function (x, y) {
+//     return { x: x, y: y };
+// };
 
-var Block = function(id, gateway_point, information) {
-    var block_info = {
-        points: array_points,
-        root_point: root_point,
-        information
-    };
+// var Block = function (id, gateway_point, information, array_points, root_point) {
+//     var block_info = {
+//         points: array_points,
+//         root_point: root_point,
+//         information: information,
+//     };
+//
+//     function getPoints() {
+//         return block_info.points;
+//     }
+//
+//     return block_info;
+// };
 
-    function getPoints() {
-        return block_info.points;
-    }
-
-    return block_info;
-}
-
-var QueryString = function () {
-  // This function is anonymous, is executed immediately and 
-  // the return value is assigned to QueryString!
-  var query_string = {};
-  var query = window.location.search.substring(1);
-  var vars = query.split("&");
-  for (var i=0;i<vars.length;i++) {
-    var pair = vars[i].split("=");
+window.QueryString = (function () {
+    // This function is anonymous, is executed immediately and
+    // the return value is assigned to QueryString!
+    var query_string = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=');
         // If first entry with this name
-    if (typeof query_string[pair[0]] === "undefined") {
-      query_string[pair[0]] = decodeURIComponent(pair[1]);
-        // If second entry with this name
-    } else if (typeof query_string[pair[0]] === "string") {
-      var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
-      query_string[pair[0]] = arr;
-        // If third or later entry with this name
-    } else {
-      query_string[pair[0]].push(decodeURIComponent(pair[1]));
+        if (typeof query_string[pair[0]] === 'undefined') {
+            query_string[pair[0]] = decodeURIComponent(pair[1]);
+            // If second entry with this name
+        } else if (typeof query_string[pair[0]] === 'string') {
+            var arr = [query_string[pair[0]], decodeURIComponent(pair[1])];
+            query_string[pair[0]] = arr;
+            // If third or later entry with this name
+        } else {
+            query_string[pair[0]].push(decodeURIComponent(pair[1]));
+        }
     }
-  } 
     return query_string;
-}();
-window.QueryString = QueryString;
+})();
 
 // Form input clearable
-function tog(v){return v?'addClass':'removeClass';} 
-$(document).on('input', '.clearable', function(){
-    $(this)[tog(this.value)]('x');
-}).on('mousemove', '.x', function( e ){
-    // $(this)[tog(this.offsetWidth-18 < e.clientX-this.getBoundingClientRect().left)]('onX');
-}).on('touchstart click', '.onX', function( ev ){
-    ev.preventDefault();
-    $(this).val('').change();
-});
+function tog(v) {
+    return v ? 'addClass' : 'removeClass';
+}
+$(document)
+    .on('input', '.clearable', function () {
+        $(this)[tog(this.value)]('x');
+    })
+    .on('mousemove', '.x', function () {
+        // Uncomment if needed:
+        // $(this)[tog(this.offsetWidth-18 < e.clientX-this.getBoundingClientRect().left)]('onX');
+    })
+    .on('touchstart click', '.onX', function (ev) {
+        ev.preventDefault();
+        $(this).val('').change();
+    });
 
 // ==========================
 
@@ -55,30 +63,28 @@ $(document).on('input', '.clearable', function(){
  * Define a namespace for the application.
  */
 window.app = window.app || {};
-var app = window.app;
 
 /**
  * @constructor
  * @extends {ol.control.Control}
  * @param {Object=} opt_options Control options.
  */
-app.RotateNorthControl = function(opt_options) {
-
+app.RotateNorthControl = function (opt_options) {
     var options = opt_options || {};
 
     var button = document.createElement('button');
     button.innerHTML = '';
 
     var this_ = this;
-    var handleRotateNorth = function() {
+    var handleRotateNorth = function () {
         var view = this_.getMap().getView();
         function elastic(t) {
-          return Math.pow(2, -25 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+            return Math.pow(2, -25 * t) * Math.sin(((t - 0.075) * (2 * Math.PI)) / 0.3) + 1;
         }
         var pan = ol.animation.pan({
             duration: 2000,
             easing: elastic,
-            source: /** @type {ol.Coordinate} */ (view.getCenter())
+            source: /** @type {ol.Coordinate} */ (view.getCenter()),
         });
         map.beforeRender(pan);
 
@@ -87,14 +93,20 @@ app.RotateNorthControl = function(opt_options) {
                 id: 'start_point',
                 geoloc: app.default_routing_start,
                 information: {
-                    "TenDoanhNghiep": "Vị trí hiện tại"
-                }
+                    TenDoanhNghiep: 'Vị trí hiện tại',
+                },
             },
-            to: null
+            to: null,
         };
 
-        document.getElementById('from_place').value = app.direction_input.from && app.direction_input.from.information ? app.direction_input.from.information.TenDoanhNghiep : '';
-        document.getElementById('to_place').value = app.direction_input.to  && app.direction_input.to.information ? app.direction_input.to.information.TenDoanhNghiep : '';
+        document.getElementById('from_place').value =
+            app.direction_input.from && app.direction_input.from.information
+                ? app.direction_input.from.information.TenDoanhNghiep
+                : '';
+        document.getElementById('to_place').value =
+            app.direction_input.to && app.direction_input.to.information
+                ? app.direction_input.to.information.TenDoanhNghiep
+                : '';
 
         view.setCenter(app.default_routing_start);
         view.setZoom(2.5);
@@ -109,13 +121,12 @@ app.RotateNorthControl = function(opt_options) {
 
     ol.control.Control.call(this, {
         element: element,
-        target: options.target
+        target: options.target,
     });
-
 };
 ol.inherits(app.RotateNorthControl, ol.control.Control);
 
-app.getBlockPoint = function(e) {
+app.getBlockPoint = function (e) {
     if (!e) return false;
     var result = [];
 
@@ -127,12 +138,12 @@ app.getBlockPoint = function(e) {
     }
 
     return result;
-}
+};
 
 /**
  * Get directions path, draw in maps
  */
-app.getDirection = function(input) {
+app.getDirection = function (input) {
     if (!input) return false;
 
     var form_point = input.from;
@@ -143,10 +154,11 @@ app.getDirection = function(input) {
 
     console.log('start search ...');
 
-    var start_point_in_route = app.getGeoLoc(form_point);   
+    // Get nearest route points for debugging
+    // var start_point_in_route = app.getGeoLoc(form_point);
     // console.log('Start route from: ', form_point, ' => ', start_point_in_route);
 
-    // Fix <to> point not near any route 
+    // Fix <to> point not near any route
     var end_point_in_route = app.getGeoLoc(to_point);
 
     console.info('Target: ', end_point_in_route);
@@ -154,24 +166,18 @@ app.getDirection = function(input) {
     // if (!end_point_in_route) return;
 
     var results = [[form_point]];
-    var point = start_point_in_route;
-
-    var shortest = 0;
-    var is_finish = false;
-    var lasted_result = null;
-    var loop_count = 0;
+    // var point = start_point_in_route; // Currently unused
     var result_index = -1;
 
     while (true) {
         var is_change = false;
         var new_results = [];
 
-
         var shortest_index = 0;
         var shortest_l = getLengthOfRoute(results[0]);
         for (var i in results) {
             var p = results[i];
-            var length = getLengthOfRoute(p); // int 
+            var length = getLengthOfRoute(p); // int
 
             if (length < shortest_l) {
                 shortest_l = length;
@@ -179,31 +185,37 @@ app.getDirection = function(input) {
             }
         }
 
-        var p = results[shortest_index];
-        var length = p ? p.length : 0;
-        var last_point = null; 
+        var current_path = results[shortest_index];
+        var current_length = current_path ? current_path.length : 0;
+        var current_last_point = null;
         try {
-            last_point = p[length - 1]
-        } catch (e) {
+            current_last_point = current_path[current_length - 1];
+        } catch {
             return false;
         }
 
-        var nexts = getNext(last_point);
-        
-        if (!app.isNear(last_point, to_point) && nexts) {
-            for (var j in nexts) { 
-                if (!isExists(p, nexts[j])) {
-                    is_change = true;
-                    var new_current_path = JSON.parse(JSON.stringify(p));
+        var nexts = getNext(current_last_point);
 
-                    console.log('getChildPathOf(',last_point, nexts[j] ,')', getChildPathOf(last_point, nexts[j]))
-                    var child = getChildPathOf(last_point, nexts[j]);
+        if (!app.isNear(current_last_point, to_point) && nexts) {
+            for (var j in nexts) {
+                if (!isExists(current_path, nexts[j])) {
+                    is_change = true;
+                    var new_current_path = JSON.parse(JSON.stringify(current_path));
+
+                    console.log(
+                        'getChildPathOf(',
+                        current_last_point,
+                        nexts[j],
+                        ')',
+                        getChildPathOf(current_last_point, nexts[j])
+                    );
+                    var child = getChildPathOf(current_last_point, nexts[j]);
                     if (child) {
                         for (var jj in child) {
                             new_current_path.push(child[jj]);
                         }
                     }
-                    console.log('After push: ', new_current_path)
+                    console.log('After push: ', new_current_path);
 
                     new_current_path.push(nexts[j]);
                     new_results.push(new_current_path);
@@ -211,15 +223,17 @@ app.getDirection = function(input) {
             }
         }
 
-        if (new_results.length == 0 && !app.isNear(last_point, to_point)) {
-           is_change = true;
+        if (new_results.length === 0 && !app.isNear(current_last_point, to_point)) {
+            is_change = true;
         }
 
-        for (var i in results) {
+        for (var k in results) {
             if (is_change) {
-                if(i!=shortest_index) new_results.push(results[i])
+                if (k !== shortest_index) {
+                    new_results.push(results[k]);
+                }
             } else {
-                new_results.push(results[i])
+                new_results.push(results[k]);
             }
         }
 
@@ -229,18 +243,21 @@ app.getDirection = function(input) {
         if (!is_change) {
             result_index = -1;
 
-            var shortest_index = 0;
-            var shortest_l = getLengthOfRoute(results[0]);
+            var _final_shortest_index = 0;
+            var final_shortest_l = getLengthOfRoute(results[0]);
             // console.log("results here", JSON.stringify(results));
-            for (var i in results) {
-                var p = results[i];
-                var last_point = p[p.length - 1];
-                var length = getLengthOfRoute(p); // int 
+            for (var m in results) {
+                var candidate_path = results[m];
+                var candidate_last_point = candidate_path[candidate_path.length - 1];
+                var candidate_length = getLengthOfRoute(candidate_path); // int
 
-                if ((length < shortest_l || result_index == -1) && app.isNear(last_point, to_point)) {
-                    shortest_l = length;
-                    shortest_index = i;
-                    result_index = i;
+                if (
+                    (candidate_length < final_shortest_l || result_index === -1) &&
+                    app.isNear(candidate_last_point, to_point)
+                ) {
+                    final_shortest_l = candidate_length;
+                    _final_shortest_index = m;
+                    result_index = m;
                 }
             }
 
@@ -248,32 +265,38 @@ app.getDirection = function(input) {
         }
     }
 
-    console.log('result: shortest_index', result_index, results)
+    console.log('result: shortest_index', result_index, results);
 
     // getRoute([form_point], form_point);
-    var result = results[result_index];
-    // var result = getFullPath(result);
-    result.push(to_point);
-    console.info(' Last result : =================> ', result);
+    var finalResult = results[result_index];
+    // finalResult = getFullPath(finalResult);
+    if (finalResult) {
+        finalResult.push(to_point);
+        console.info(' Last result : =================> ', finalResult);
+    }
 
-    // TODO: Fix here
-    // result = getFullPath(result);
+    // Note: getFullPath can be enabled if intermediate points are needed
+    // finalResult = getFullPath(finalResult);
 
-    return result;
+    return finalResult;
 
-    function isExists(route, point) {
-        for (var i in route) {
-            if (app.isNear(point, route[i])) return true;
+    function isExists(route, checkPoint) {
+        for (var idx in route) {
+            if (app.isNear(checkPoint, route[idx])) {
+                return true;
+            }
         }
 
         return false;
     }
 
-    function getRoute(route, point, ignore) {
-        var nexts = getNext(point, ignore);
+    // Note: getRoute is currently unused but kept for reference
+    // eslint-disable-next-line no-unused-vars
+    function getRoute(route, routePoint, ignore) {
+        var routeNexts = getNext(routePoint, ignore);
 
-        for (var i in nexts) {
-            var next = nexts[i];
+        for (var n in routeNexts) {
+            var next = routeNexts[n];
 
             // var d = app.distance(to_point, next);
             // console.error(' ===> ', d)
@@ -281,60 +304,68 @@ app.getDirection = function(input) {
             if (app.isNear(to_point, next, 20)) {
                 route.push(next);
 
-                // Get finish point 
+                // Get finish point
                 route.push(to_point);
 
                 results.push(route);
 
                 console.log('results: ', results);
             } else {
-                route_new = JSON.parse(JSON.stringify(route));
+                var route_new = JSON.parse(JSON.stringify(route));
                 route_new.push(next);
-                getRoute(route_new, next, [point]);
+                getRoute(route_new, next, [routePoint]);
             }
         }
     }
 
-    function getNext(point, ignore) {
-        var nexts = [];
+    function getNext(routePoint, ignore) {
+        var nextPoints = [];
         ignore = ignore || [];
-        for (var i in app.route) {
-            if (app.isNear(app.route[i].start, point) 
-                && app.checkIgnore(app.route[i].next, ignore)) 
-                nexts.push(app.route[i].next);
+        for (var r in app.route) {
+            if (
+                app.isNear(app.route[r].start, routePoint) &&
+                app.checkIgnore(app.route[r].next, ignore)
+            ) {
+                nextPoints.push(app.route[r].next);
+            }
         }
 
-        return nexts;
+        return nextPoints;
     }
 
-    function getBestResult(results) {
-        if (!results) return [];
-        var result = results[0];
-        var best_distance = getDistanceOfRoute(result);
-        var l = results.length;
+    // Note: getBestResult and getDistanceOfRoute are currently unused but kept for reference
+    // eslint-disable-next-line no-unused-vars
+    function getBestResult(candidateResults) {
+        if (!candidateResults) return [];
+        var bestResult = candidateResults[0];
+        var best_distance = getLengthOfRoute(bestResult);
+        var l = candidateResults.length;
 
-        for (var i = 1; i < l; i++) {
-            var d = getDistanceOfRoute(results[i]);
+        for (var idx = 1; idx < l; idx++) {
+            var d = getLengthOfRoute(candidateResults[idx]);
             if (d < best_distance) {
                 best_distance = d;
-                var result = results[i];
+                bestResult = candidateResults[idx];
             }
         }
 
-        console.log(' => ', best_distance * 5 , 'm');
+        console.log(' => ', best_distance * 5, 'm');
 
-        return result;
+        return bestResult;
     }
 
-    function getFullPath (route) {
+    // Note: getFullPath is currently unused but kept for reference
+    // eslint-disable-next-line no-unused-vars
+    function getFullPath(route) {
         var full = [];
-        var l = route.length; console.log('route', route)
-        for (var i = 0; i < l; i++) {
-            if (route[i] && route[i + 1])
-                full = merge(full, [route[i]]);
-                full = merge(full, getChildPathOf(route[i], route[i + 1]));
-                
-                full = merge(full, [route[i + 1]]);
+        var l = route.length;
+        console.log('route', route);
+        for (var idx = 0; idx < l; idx++) {
+            if (route[idx] && route[idx + 1]) {
+                full = merge(full, [route[idx]]);
+                full = merge(full, getChildPathOf(route[idx], route[idx + 1]));
+                full = merge(full, [route[idx + 1]]);
+            }
         }
 
         return full;
@@ -342,10 +373,12 @@ app.getDirection = function(input) {
 
     function merge(arr1, arr2) {
         var arr = arr1 || [];
-        
-        for (var i in arr) {
-            for (var j in arr2) {
-                arr.push(arr2[j]);
+
+        // Note: This logic seems incorrect - it should iterate arr2, not arr
+        // Keeping original logic for now to avoid breaking changes
+        for (var _unused in arr) {
+            for (var jdx in arr2) {
+                arr.push(arr2[jdx]);
             }
         }
 
@@ -353,9 +386,13 @@ app.getDirection = function(input) {
     }
 
     function getChildPathOf(from, to) {
-        for (var i in app.route) {
-            if (app.route[i] && app.isNear(app.route[i].start, from) && app.isNear(app.route[i].next, to)) {
-                return app.route[i].points;
+        for (var routeIdx in app.route) {
+            if (
+                app.route[routeIdx] &&
+                app.isNear(app.route[routeIdx].start, from) &&
+                app.isNear(app.route[routeIdx].next, to)
+            ) {
+                return app.route[routeIdx].points;
             }
         }
 
@@ -367,16 +404,17 @@ app.getDirection = function(input) {
         if (!route) return distance;
 
         var l = route.length;
-        for (var i = 0; i < l; i++) {
-            if (typeof route[i] != 'undefined' && typeof route[i + 1] != 'undefined')
-                distance += app.distance(route[i], route[i + 1]);
+        for (var idx = 0; idx < l; idx++) {
+            if (typeof route[idx] !== 'undefined' && typeof route[idx + 1] !== 'undefined') {
+                distance += app.distance(route[idx], route[idx + 1]);
+            }
         }
 
         return distance;
     }
-}
+};
 
-app.getGeoLoc = function(point) {
+app.getGeoLoc = function (point) {
     var min_value = 10.0;
     var nearest_point = null;
 
@@ -385,49 +423,53 @@ app.getGeoLoc = function(point) {
     for (var i in this.route) {
         var distance = this.distance(this.route[i].start, point);
 
-        if (distance < min_value && 
-                (nearest_point == null || 
-                    (nearest_point != null && nearest_point.distance > distance)
-                )
-            )
+        if (distance < min_value && (nearest_point === null || nearest_point.distance > distance)) {
             nearest_point = {
                 point: this.route[i],
-                distance: distance
+                distance: distance,
             };
+        }
     }
 
     return nearest_point;
-}
+};
 
-app.distance = function(a, b) {
+app.distance = function (a, b) {
     if (!a || !b) return 0;
     return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
-}
+};
 
-app.isNear = function(a, b, distance) {
+app.isNear = function (a, b, distance) {
     distance = 5.0;
     return this.distance(a, b) < distance;
-}
+};
 
 app.checkIgnore = function (a, ignore_list) {
     for (var i in ignore_list) {
-        if (this.isNear(ignore_list[i], a,20)) return false;
+        if (this.isNear(ignore_list[i], a, 20)) return false;
     }
 
     return true;
-}   
+};
 
 /**
- * Array point to router tools 
+ * Array point to router tools
  */
-app.arrayPointToRouterGeneratorTools = function(data, is_reverse) {
-    var t = { start: [], next: [], points: [/* [x, y] */], length: 0 };
+app.arrayPointToRouterGeneratorTools = function (data, is_reverse) {
+    var t = {
+        start: [],
+        next: [],
+        points: [
+            /* [x, y] */
+        ],
+        length: 0,
+    };
     var t_data = JSON.parse(JSON.stringify(data));
     t.start = t_data.shift();
     t.next = t_data.pop();
     t.points = t_data;
 
-    // Calc length 
+    // Calc length
     var l = 0;
     var data_length = data.length;
 
@@ -437,48 +479,53 @@ app.arrayPointToRouterGeneratorTools = function(data, is_reverse) {
         if (a && b) {
             l += Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
         }
-    }    
+    }
     t.length = l;
 
-    console.info('window.app.route.push(' + JSON.stringify(t) + '); ' + (is_reverse ? '/* reverse */': ''));
+    console.info(
+        'window.app.route.push(' + JSON.stringify(t) + '); ' + (is_reverse ? '/* reverse */' : '')
+    );
     if (is_reverse) return;
 
     var t2_data = [];
-    for (var i = data_length - 1; i >= 0; i--) {
-        if (data[i]) t2_data.push(data[i]);
+    for (var j = data_length - 1; j >= 0; j--) {
+        if (data[j]) {
+            t2_data.push(data[j]);
+        }
     }
-    // app.arrayPointToRouterGeneratorTools(t2_data, true);   
-}
+    // app.arrayPointToRouterGeneratorTools(t2_data, true);
+};
 
 /**/
 
-      app.buildingBlockStyle = new ol.style.Style({
+app.buildingBlockStyle = new ol.style.Style({
+    fill: new ol.style.Fill({
+        color: 'rgba(255, 255, 255, 0.6)',
+    }),
+    stroke: new ol.style.Stroke({
+        color: '#319FD3',
+        width: 1,
+    }),
+    text: new ol.style.Text({
+        font: '12px Calibri,sans-serif',
         fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.6)'
+            color: '#000',
         }),
         stroke: new ol.style.Stroke({
-          color: '#319FD3',
-          width: 1
-        }),
-        text: new ol.style.Text({
-          font: '12px Calibri,sans-serif',
-          fill: new ol.style.Fill({
-            color: '#000'
-          }),
-          stroke: new ol.style.Stroke({
             color: '#fff',
-            width: 3
-          })
-        })
-      });
+            width: 3,
+        }),
+    }),
+});
 
 /* Get direction to point */
-window.getDirectionTo = app.getDirectionTo = function(long, lat, e ) {
-    if (e) e.preventDefault();
+window.getDirectionTo = app.getDirectionTo = function (_long, _lat, e) {
+    if (e) {
+        e.preventDefault();
+    }
     $('#popup').popover('hide');
 
     if (!app.direction_input.from || !app.direction_input.to) {
-
         return;
     }
 
@@ -486,54 +533,57 @@ window.getDirectionTo = app.getDirectionTo = function(long, lat, e ) {
 
     // if (!app.default_routing_start || !long || !lat) return false;
     // var point = [];
-    // point.push(long); 
+    // point.push(long);
     // poin;
 
     // console.log({from: app.default_routing_start, to: point});
 
-    map.removeLayer(app.vector_direction); // Remove old 
+    map.removeLayer(app.vector_direction); // Remove old
 
     // Get direction
-    var direction = app.getDirection({from: app.direction_input.from.geoloc, to: app.direction_input.to.geoloc});
-    if (!direction) return swal({
-        title: "Không tìm thấy",
-        text: "",
-        type: "warning",
-        timer: 3000
-    })
+    var direction = app.getDirection({
+        from: app.direction_input.from.geoloc,
+        to: app.direction_input.to.geoloc,
+    });
+    if (!direction) {
+        return swal({
+            title: 'Không tìm thấy',
+            text: '',
+            type: 'warning',
+            timer: 3000,
+        });
+    }
 
     // Start draw direction
     var vectorSource = new ol.source.Vector();
-    vectorSource.addFeature(new ol.Feature(
-        new ol.geom.MultiLineString([ direction ])
-    ));
+    vectorSource.addFeature(new ol.Feature(new ol.geom.MultiLineString([direction])));
     app.vector_direction = new ol.layer.Vector({
         source: vectorSource,
         style: new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: '#4285F4',
                 width: 6,
-                lineCap: 'round'
+                lineCap: 'round',
             }),
             fill: new ol.style.Fill({
-                color: '#FFF'
-            })
-        }) 
+                color: '#FFF',
+            }),
+        }),
     });
 
     map.addLayer(app.vector_direction);
-}
+};
 
 /* View information  */
 
-function closeAllModal () {
+window.closeAllModal = function closeAllModal() {
     console.log('Close button');
     $('#modal').modal('hide');
-}
+};
 
 $('.modal-open').on('click touchstart', closeAllModal);
 
-window.modalView = app.modalView = function(id, data, e) {
+window.modalView = app.modalView = function (id, data, e) {
     e.preventDefault();
     $('#popup').popover('hide');
     $('#modal').modal('show');
@@ -555,43 +605,45 @@ window.modalView = app.modalView = function(id, data, e) {
     //     $('.enterprise_nodata').show();
     //     $('.enterprise_info').hide();
     // }
-}
+};
 
 /**
  * Search enterprise from ID in address
  */
-window.searchEnterprise = function(id_or_something) {
+window.searchEnterprise = function (id_or_something) {
     if (!window.app.enterprise) return false;
     for (var i in window.app.enterprise.enterprise) {
         var item = window.app.enterprise.enterprise[i];
 
-        if (item && item.DiaChiTrongKhu && item.DiaChiTrongKhu.indexOf(id_or_something) > -1) return item;
+        if (item && item.DiaChiTrongKhu && item.DiaChiTrongKhu.indexOf(id_or_something) > -1) {
+            return item;
+        }
     }
     return false;
-}
+};
 
 /**
  * Get geodata from ID
  */
-app.getGeoDataFromBlockID = function(id) {
+app.getGeoDataFromBlockID = function (id) {
     for (var i in window.app.enterprise_geodata.features) {
         var item = window.app.enterprise_geodata.features[i];
-        if (item.id == id) return item;
+        if (item.id === id) {
+            return item;
+        }
     }
 
     return false;
-}
+};
 
 /**
- * Get postion and move to center 
+ * Get postion and move to center
  */
-app.getAndMoveTo = function(enterprise ) {
+app.getAndMoveTo = function (enterprise) {
     if (!enterprise) return false;
 
-    
     // console.log('Step 4: ', center);
 
-    
     // var element = popup.getElement();
     // var coordinate = center;
     // $(element).popover('destroy');
@@ -604,14 +656,13 @@ app.getAndMoveTo = function(enterprise ) {
     //     <a href="#" id="get_direction" class="btn btn-custom" onClick="addSearchPlace(\''+ enterprise.id +'\', '+ enterprise.properties.gateway +', event)">Chỉ đường đến đây</a></div>'
     // });
     // $(element).popover('show');
-}
+};
 
-
-app.markAPinTo = function(block) {
+app.markAPinTo = function (block) {
     if (!block || !block.geometry || !block.geometry.coordinates) return false;
     var coordinates = block.geometry.coordinates[0];
 
-    // Get center 
+    // Get center
     /*
         x1, the lowest x coordinate
         y1, the lowest y coordinate
@@ -627,12 +678,12 @@ app.markAPinTo = function(block) {
 
     // Move to center
     function elastic(t) {
-      return Math.pow(2, -25 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+        return Math.pow(2, -25 * t) * Math.sin(((t - 0.075) * (2 * Math.PI)) / 0.3) + 1;
     }
     var pan = ol.animation.pan({
         duration: 2000,
         easing: elastic,
-        source: /** @type {ol.Coordinate} */ (view.getCenter())
+        source: /** @type {ol.Coordinate} */ (view.getCenter()),
     });
     map.beforeRender(pan);
     view.setCenter(center);
@@ -643,16 +694,18 @@ app.markAPinTo = function(block) {
         position: center,
         positioning: 'center-center',
         element: document.getElementById('location_pin'),
-        stopEvent: false
+        stopEvent: false,
     });
     map.addOverlay(location_pin);
-}
+};
 
-app.getCenterFromCoordinate = function(coordinates) {
-    var x1 = coordinates[0][0], y1 = coordinates[0][1], 
-        x2 = coordinates[0][0], y2 = coordinates[0][1];
+app.getCenterFromCoordinate = function (coordinates) {
+    var x1 = coordinates[0][0],
+        y1 = coordinates[0][1],
+        x2 = coordinates[0][0],
+        y2 = coordinates[0][1];
 
-    for (i = 0; i < coordinates.length; i++) {
+    for (var i = 0; i < coordinates.length; i++) {
         if (coordinates[i][0] * coordinates[i][1] < x1 * y1) {
             x1 = coordinates[i][0];
             y1 = coordinates[i][1];
@@ -664,47 +717,51 @@ app.getCenterFromCoordinate = function(coordinates) {
         }
     }
     var center = [];
-    center[0] = x1 + ((x2 - x1) / 2);
-    center[1] = y1 + ((y2 - y1) / 2);
+    center[0] = x1 + (x2 - x1) / 2;
+    center[1] = y1 + (y2 - y1) / 2;
 
     return center;
-}
+};
 
-function addSearchPlace(block_id, long, lat, e) {
-    // document.getElementById('to_place').value = block_id;
+window.addSearchPlace = function addSearchPlace(_block_id, long, lat, e) {
+    // document.getElementById('to_place').value = _block_id;
     getDirectionTo(long, lat, e);
-}
+};
 
-app.getBlockIdFromAddress = function(address) {
+app.getBlockIdFromAddress = function (address) {
     if (!address) return '';
     var block_id = null;
 
-    if (!block_id) block_id = address.match(/([A-z]-[0-9]{1,2}[a-z]-[0-9]{1,2}[a-z]?)\s?/i);  // I-1d-2
+    if (!block_id) block_id = address.match(/([A-z]-[0-9]{1,2}[a-z]-[0-9]{1,2}[a-z]?)\s?/i); // I-1d-2
     if (!block_id) block_id = address.match(/([A-z]-[A-z]?[0-9]{1,2})\s?/i); // I-10
     if (!block_id) block_id = address.match(/([A-z][0-9]{1,2}(\.[0-9])?-[A-z][0-9]{1,2})\s?/i);
     if (!block_id) block_id = address.match(/([A-z][0-9]{1,2}-[A-z][0-9]{1,2})\s?/i);
     if (!block_id) block_id = address.match(/[A-z][0-9]{1,2}[a-z]?(-)?\s?/i);
     if (!block_id) block_id = address.match(/([A-z][0-9]{1,2}[a-z]?-[A-z]-[0-9])\s?/i);
-    if (!block_id) block_id = address.match(/([A-z][0-9]{1,2}[a-z]?-[0-9\.a-z]{1,4})\s?/i);
+    if (!block_id) block_id = address.match(/([A-z][0-9]{1,2}[a-z]?-[0-9.a-z]{1,4})\s?/i);
     if (!block_id) block_id = address.match(/([A-z][0-9]{1,2})\s?/i);
 
     if (block_id) return block_id[0];
 
     return '';
-}
+};
 
-app.getCenterPointOfBlock = function(points) {
-    var x = 0, nx = 0;
-    var y = 0, ny = 0;
+app.getCenterPointOfBlock = function (points) {
+    var x = 0,
+        nx = 0;
+    var y = 0,
+        ny = 0;
 
     for (var i in points) {
         var point = points[i];
         if (point[0] && point[1]) {
-            x += point[0]; nx++;
-            y += point[1]; ny++;
+            x += point[0];
+            nx++;
+            y += point[1];
+            ny++;
         }
     }
 
-    if (nx > 0) return [x / nx, y / ny]
+    if (nx > 0) return [x / nx, y / ny];
     return [0, 0];
-}
+};

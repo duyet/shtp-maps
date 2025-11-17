@@ -224,7 +224,7 @@ Draw mode:  http://maps.com/?__draw=1
 
       var vectorLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
-          url: 'assets/data.geojson',
+          url: './assets/data.geojson',
           format: new ol.format.GeoJSON(),
           wrapX: false,
         }),
@@ -539,12 +539,12 @@ Draw mode:  http://maps.com/?__draw=1
 
           recognition.onstart = function () {
             recognizing = true;
-            $(that).css('backgroundImage', 'url(assets/images/501cyan.png)');
+            $(that).css('backgroundImage', 'url(./assets/images/501cyan.png)');
             $(that).parent().find('input').val('...');
           };
           recognition.onend = function () {
             recognizing = false;
-            $(that).css('backgroundImage', 'url(assets/images/501black.png)');
+            $(that).css('backgroundImage', 'url(./assets/images/501black.png)');
           };
 
           recognition.onresult = function (event) {

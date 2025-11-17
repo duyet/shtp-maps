@@ -12,7 +12,18 @@ Draw mode:  http://maps.com/?__draw=1
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>SHTP Maps</title>
-    <link rel="stylesheet" crossorigin href="/shtp-maps/assets/main-nv0S8VH_.css">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./bower_components/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./bower_components/sweetalert/dist/sweetalert.css"
+    />
+    <link rel="stylesheet" type="text/css" href="./css/ol.css" />
+    <link rel="stylesheet" type="text/css" href="./css/main.css" />
   </head>
 
   <body>
@@ -103,11 +114,11 @@ Draw mode:  http://maps.com/?__draw=1
     <script src="./bower_components/jquery/dist/jquery.min.js"></script>
     <script src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="./bower_components/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="./assets/js/bootstrap3-typeahead.min.js"></script>
-    <script type="text/javascript" src="./assets/js/islab-maps.js"></script>
-    <script type="text/javascript" src="./assets/geodata.js"></script>
-    <script type="text/javascript" src="./assets/route.js"></script>
-    <script type="text/javascript" src="./assets/js/maps.js"></script>
+    <script src="./js/bootstrap3-typeahead.min.js"></script>
+    <script type="text/javascript" src="./js/islab-maps.js"></script>
+    <script type="text/javascript" src="./geodata.js"></script>
+    <script type="text/javascript" src="./route.js"></script>
+    <script type="text/javascript" src="./js/maps.js"></script>
     <script type="text/javascript">
       $('#map').on('touchstart', function (event) {
         event.preventDefault();
@@ -213,7 +224,7 @@ Draw mode:  http://maps.com/?__draw=1
 
       var vectorLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
-          url: './assets/data.geojson',
+          url: './data.geojson',
           format: new ol.format.GeoJSON(),
           wrapX: false,
         }),
@@ -254,7 +265,7 @@ Draw mode:  http://maps.com/?__draw=1
                   html: 'ISLab ',
                 }),
               ],
-              url: './assets/images/kcnc_bando.jpg',
+              url: './images/kcnc_bando.jpg',
               projection: projection,
               imageExtent: extent,
             }),
@@ -469,7 +480,7 @@ Draw mode:  http://maps.com/?__draw=1
       });
 
       // Draw gateway
-      $.get('./assets/data.geojson', function (data) {
+      $.get('./data.geojson', function (data) {
         try {
           var data = JSON.parse(data);
           console.log(data);
@@ -528,12 +539,12 @@ Draw mode:  http://maps.com/?__draw=1
 
           recognition.onstart = function () {
             recognizing = true;
-            $(that).css('backgroundImage', 'url(./assets/images/501cyan.png)');
+            $(that).css('backgroundImage', 'url(./images/501cyan.png)');
             $(that).parent().find('input').val('...');
           };
           recognition.onend = function () {
             recognizing = false;
-            $(that).css('backgroundImage', 'url(./assets/images/501black.png)');
+            $(that).css('backgroundImage', 'url(./images/501black.png)');
           };
 
           recognition.onresult = function (event) {
@@ -674,7 +685,7 @@ Draw mode:  http://maps.com/?__draw=1
         }
 
         // Draw gateway
-        $.get('./assets/data.geojson', function (data) {
+        $.get('./data.geojson', function (data) {
           try {
             var data = JSON.parse(data);
             console.log(data);

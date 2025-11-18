@@ -25,3 +25,6 @@ assets/enterprise.js
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Renovate configuration
+renovate.json

@@ -9,11 +9,12 @@ const __dirname = dirname(__filename);
 export default defineConfig({
     base: '/shtp-maps/',
     root: '.',
-    publicDir: 'assets',
+    publicDir: 'public',
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
         emptyOutDir: true,
+        copyPublicDir: true,
         rollupOptions: {
             input: {
                 main: resolve(__dirname, 'index.html'),

@@ -65,66 +65,78 @@ $(document)
 window.app = window.app || {};
 
 /**
- * @constructor
- * @extends {ol.control.Control}
- * @param {Object=} opt_options Control options.
+ * Custom Reset Control for OpenLayers 8
  */
-app.RotateNorthControl = function (opt_options) {
-    var options = opt_options || {};
+app.RotateNorthControl = class extends EventTarget {
+    constructor(opt_options) {
+        super();
+        const options = opt_options || {};
 
-    var button = document.createElement('button');
-    button.innerHTML = '';
+        const button = document.createElement('button');
+        button.innerHTML = '';
 
-    var this_ = this;
-    var handleRotateNorth = function () {
-        var view = this_.getMap().getView();
-        function elastic(t) {
-            return Math.pow(2, -25 * t) * Math.sin(((t - 0.075) * (2 * Math.PI)) / 0.3) + 1;
-        }
-        var pan = ol.animation.pan({
-            duration: 2000,
-            easing: elastic,
-            source: /** @type {ol.Coordinate} */ (view.getCenter()),
-        });
-        map.beforeRender(pan);
+        const handleRotateNorth = () => {
+            const view = this.getMap().getView();
+            const elastic = (t) => {
+                return Math.pow(2, -25 * t) * Math.sin(((t - 0.075) * (2 * Math.PI)) / 0.3) + 1;
+            };
 
-        app.direction_input = {
-            from: {
-                id: 'start_point',
-                geoloc: app.default_routing_start,
-                information: {
-                    TenDoanhNghiep: 'Vị trí hiện tại',
+            // Use view.animate() instead of deprecated ol.animation
+            view.animate({
+                center: app.default_routing_start,
+                zoom: 2.5,
+                duration: 2000,
+                easing: elastic,
+            });
+
+            app.direction_input = {
+                from: {
+                    id: 'start_point',
+                    geoloc: app.default_routing_start,
+                    information: {
+                        TenDoanhNghiep: 'Vị trí hiện tại',
+                    },
                 },
-            },
-            to: null,
+                to: null,
+            };
+
+            document.getElementById('from_place').value =
+                app.direction_input.from && app.direction_input.from.information
+                    ? app.direction_input.from.information.TenDoanhNghiep
+                    : '';
+            document.getElementById('to_place').value =
+                app.direction_input.to && app.direction_input.to.information
+                    ? app.direction_input.to.information.TenDoanhNghiep
+                    : '';
         };
 
-        document.getElementById('from_place').value =
-            app.direction_input.from && app.direction_input.from.information
-                ? app.direction_input.from.information.TenDoanhNghiep
-                : '';
-        document.getElementById('to_place').value =
-            app.direction_input.to && app.direction_input.to.information
-                ? app.direction_input.to.information.TenDoanhNghiep
-                : '';
+        button.addEventListener('click', handleRotateNorth, false);
+        button.addEventListener('touchstart', handleRotateNorth, false);
 
-        view.setCenter(app.default_routing_start);
-        view.setZoom(2.5);
-    };
+        const element = document.createElement('div');
+        element.className = 'rotate-north ol-control ol-unselectable';
+        element.appendChild(button);
 
-    button.addEventListener('click', handleRotateNorth, false);
-    button.addEventListener('touchstart', handleRotateNorth, false);
+        this.element = element;
+        this.target = options.target;
+    }
 
-    var element = document.createElement('div');
-    element.className = 'rotate-north ol-control';
-    element.appendChild(button);
+    getElement() {
+        return this.element;
+    }
 
-    ol.control.Control.call(this, {
-        element: element,
-        target: options.target,
-    });
+    setMap(map) {
+        this.map_ = map;
+        if (map && this.element && !this.element.parentNode) {
+            const target = this.target || map.getOverlayContainerStopEvent();
+            target.appendChild(this.element);
+        }
+    }
+
+    getMap() {
+        return this.map_;
+    }
 };
-ol.inherits(app.RotateNorthControl, ol.control.Control);
 
 app.getBlockPoint = function (e) {
     if (!e) return false;
@@ -498,25 +510,32 @@ app.arrayPointToRouterGeneratorTools = function (data, is_reverse) {
 
 /**/
 
-app.buildingBlockStyle = new ol.style.Style({
-    fill: new ol.style.Fill({
-        color: 'rgba(255, 255, 255, 0.6)',
-    }),
-    stroke: new ol.style.Stroke({
-        color: '#319FD3',
-        width: 1,
-    }),
-    text: new ol.style.Text({
-        font: '12px Calibri,sans-serif',
-        fill: new ol.style.Fill({
-            color: '#000',
-        }),
-        stroke: new ol.style.Stroke({
-            color: '#fff',
-            width: 3,
-        }),
-    }),
-});
+// Building block style - will be created dynamically when needed
+app.getBuildingBlockStyle = function () {
+    // Dynamic import for OpenLayers 8
+    if (typeof Style !== 'undefined') {
+        return new Style({
+            fill: new Fill({
+                color: 'rgba(255, 255, 255, 0.6)',
+            }),
+            stroke: new Stroke({
+                color: '#319FD3',
+                width: 1,
+            }),
+            text: new Text({
+                font: '12px Calibri,sans-serif',
+                fill: new Fill({
+                    color: '#000',
+                }),
+                stroke: new Stroke({
+                    color: '#fff',
+                    width: 3,
+                }),
+            }),
+        });
+    }
+    return null;
+};
 
 /* Get direction to point */
 window.getDirectionTo = app.getDirectionTo = function (_long, _lat, e) {
@@ -538,7 +557,9 @@ window.getDirectionTo = app.getDirectionTo = function (_long, _lat, e) {
 
     // console.log({from: app.default_routing_start, to: point});
 
-    map.removeLayer(app.vector_direction); // Remove old
+    if (app.vector_direction) {
+        map.removeLayer(app.vector_direction); // Remove old
+    }
 
     // Get direction
     var direction = app.getDirection({
@@ -554,24 +575,34 @@ window.getDirectionTo = app.getDirectionTo = function (_long, _lat, e) {
         });
     }
 
-    // Start draw direction
-    var vectorSource = new ol.source.Vector();
-    vectorSource.addFeature(new ol.Feature(new ol.geom.MultiLineString([direction])));
-    app.vector_direction = new ol.layer.Vector({
-        source: vectorSource,
-        style: new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: '#4285F4',
-                width: 6,
-                lineCap: 'round',
-            }),
-            fill: new ol.style.Fill({
-                color: '#FFF',
-            }),
-        }),
-    });
+    // Start draw direction - Import classes from window scope (set by main.js)
+    const VectorSource = window.ol ? window.ol.source.Vector : (typeof ol !== 'undefined' && ol.source ? ol.source.Vector : null);
+    const VectorLayer = window.ol ? window.ol.layer.Vector : (typeof ol !== 'undefined' && ol.layer ? ol.layer.Vector : null);
+    const Feature = window.ol ? window.ol.Feature : (typeof ol !== 'undefined' && ol.Feature ? ol.Feature : null);
+    const MultiLineString = window.ol ? window.ol.geom.MultiLineString : (typeof ol !== 'undefined' && ol.geom ? ol.geom.MultiLineString : null);
+    const Style = window.ol ? window.ol.style.Style : (typeof ol !== 'undefined' && ol.style ? ol.style.Style : null);
+    const Stroke = window.ol ? window.ol.style.Stroke : (typeof ol !== 'undefined' && ol.style ? ol.style.Stroke : null);
+    const Fill = window.ol ? window.ol.style.Fill : (typeof ol !== 'undefined' && ol.style ? ol.style.Fill : null);
 
-    map.addLayer(app.vector_direction);
+    if (VectorSource && VectorLayer && Feature && MultiLineString && Style && Stroke && Fill) {
+        var vectorSource = new VectorSource();
+        vectorSource.addFeature(new Feature(new MultiLineString([direction])));
+        app.vector_direction = new VectorLayer({
+            source: vectorSource,
+            style: new Style({
+                stroke: new Stroke({
+                    color: '#4285F4',
+                    width: 6,
+                    lineCap: 'round',
+                }),
+                fill: new Fill({
+                    color: '#FFF',
+                }),
+            }),
+        });
+
+        map.addLayer(app.vector_direction);
+    }
 };
 
 /* View information  */
@@ -676,27 +707,34 @@ app.markAPinTo = function (block) {
 
     var center = app.getCenterFromCoordinate(coordinates);
 
-    // Move to center
-    function elastic(t) {
-        return Math.pow(2, -25 * t) * Math.sin(((t - 0.075) * (2 * Math.PI)) / 0.3) + 1;
+    // Move to center using OpenLayers 8 animate API
+    const view = window.view || (window.map ? window.map.getView() : null);
+    const map = window.map;
+
+    if (view) {
+        function elastic(t) {
+            return Math.pow(2, -25 * t) * Math.sin(((t - 0.075) * (2 * Math.PI)) / 0.3) + 1;
+        }
+
+        view.animate({
+            center: center,
+            zoom: 4,
+            duration: 2000,
+            easing: elastic,
+        });
     }
-    var pan = ol.animation.pan({
-        duration: 2000,
-        easing: elastic,
-        source: /** @type {ol.Coordinate} */ (view.getCenter()),
-    });
-    map.beforeRender(pan);
-    view.setCenter(center);
-    view.setZoom(4);
 
     // Mark a pin to map
-    var location_pin = new ol.Overlay({
-        position: center,
-        positioning: 'center-center',
-        element: document.getElementById('location_pin'),
-        stopEvent: false,
-    });
-    map.addOverlay(location_pin);
+    const Overlay = window.ol ? window.ol.Overlay : (typeof ol !== 'undefined' && ol.Overlay ? ol.Overlay : null);
+    if (Overlay && map) {
+        var location_pin = new Overlay({
+            position: center,
+            positioning: 'center-center',
+            element: document.getElementById('location_pin'),
+            stopEvent: false,
+        });
+        map.addOverlay(location_pin);
+    }
 };
 
 app.getCenterFromCoordinate = function (coordinates) {

@@ -32,7 +32,7 @@
     "lint-staged": "^15.2.11",
     "prettier": "^3.4.2",
     "terser": "^5.44.1",
-    "vite": "^6.0.3",
+    "vite": "^7.0.0",
     "vitest": "^2.1.8"
   },
   "lint-staged": {
